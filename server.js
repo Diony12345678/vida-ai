@@ -152,6 +152,7 @@ app.post("/api/tasks", proteger, async (req, res) => {
 });
 
 app.patch("/api/tasks/:id", proteger, async (req, res) => {
+app.patch("/api/tasks/:id", proteger, async (req, res) => {
   const id = Number(req.params.id);
   const { status, result } = req.body;
   const statusPermitidos = ["pending", "in_progress", "completed", "failed"];
