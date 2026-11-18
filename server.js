@@ -23,9 +23,8 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 function proteger(req, res, next) {
   const authorization = req.headers.authorization || "";
   const tokenRecebido = authorization.startsWith("Bearer ")
-    ? authorization.slice(7)
-    : "";
-
+  ? authorization.slice(7).trim()
+  : "";
   const recebido = Buffer.from(tokenRecebido);
   const esperado = Buffer.from(adminToken);
 
