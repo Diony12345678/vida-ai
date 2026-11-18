@@ -3,104 +3,123 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VIDA AI - Painel</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VIDA AI</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-*{box-sizing:border-box}
-body{
- margin:0;background:#0b1220;color:#fff;
- font-family:Arial,sans-serif;padding:20px
-}
-.container{max-width:850px;margin:auto}
-header{padding:25px 0}
-h1{font-size:34px;margin:5px 0;color:#62e6b1}
-.sub{color:#9eafc5}
-.card{
- background:#152238;border:1px solid #293b55;
- border-radius:15px;padding:20px;margin:15px 0
-}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
-.label{color:#9eafc5;font-size:13px}
-.value{font-size:25px;font-weight:bold;margin-top:9px}
-.green{color:#62e6b1}
-.red{color:#ff8585}
-button{
- background:#62e6b1;color:#071b13;border:0;
- border-radius:9px;padding:13px 18px;
- font-weight:bold;cursor:pointer
-}
-input{
- width:100%;padding:13px;border-radius:8px;
- border:1px solid #34445c;background:#0b1423;
- color:white;margin:10px 0
-}
-#status{color:#62e6b1;margin-top:12px}
+body{margin:0;padding:20px;background:#0b1220;color:white;font-family:Arial}
+main{max-width:650px;margin:auto}
+h1{color:#62e6b1;font-size:36px}
+.card{background:#152238;padding:20px;border-radius:14px;margin:16px 0}
+input,textarea{width:100%;box-sizing:border-box;padding:13px;margin:8px 0;background:#0b1423;color:white;border:1px solid #34445c;border-radius:8px}
+textarea{min-height:100px}
+button{width:100%;padding:14px;margin-top:10px;background:#62e6b1;border:0;border-radius:8px;font-weight:bold}
+.secondary{background:#34445c;color:white}
+.muted{color:#a7b5c8}
+#status{white-space:pre-wrap;overflow-wrap:anywhere;color:#62e6b1}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#09111d;padding:12px}
 </style>
 </head>
 <body>
-<div class="container">
-
-<header>
-<div class="green">SISTEMA DE INTELIGÊNCIA</div>
+<main>
 <h1>VIDA AI</h1>
-<div class="sub">Painel central de operações</div>
-</header>
-
-<div class="card">
-<h2>Visão geral</h2>
-<div class="grid">
-<div>
-<div class="label">Orçamento de testes</div>
-<div class="value">R$ 0,00</div>
-</div>
-<div>
-<div class="label">Operações reais</div>
-<div class="value red">DESATIVADAS</div>
-</div>
-<div>
-<div class="label">Reinvestimento planejado</div>
-<div class="value green">60%</div>
-</div>
-</div>
-</div>
-
-<div class="card">
-<h2>Centro de comando</h2>
-<p class="sub">Registre um objetivo para a próxima etapa de implementação.</p>
-<input id="tarefa" placeholder="Digite um objetivo para a VIDA AI">
-<button onclick="registrar()">Registrar objetivo</button>
-<div id="status"></div>
-</div>
-
-<div class="card">
-<h2>Módulos do sistema</h2>
-<p>● Banco de dados — configurado</p>
-<p>● VIDA CORE — função criada</p>
-<p>● Asaas Sandbox — integração em desenvolvimento</p>
-<p>● Painel web — versão inicial</p>
-<p>● Agentes autônomos — ainda não ativados</p>
-</div>
+<p class="muted">Painel central de inteligência e operações</p>
 
 <div class="card">
 <h2>Segurança financeira</h2>
-<p>Limite planejado por operação: R$ 100,00</p>
-<p>Orçamento autorizado para testes: R$ 0,00</p>
-<p class="red">Nenhum pagamento real autorizado.</p>
+<p>Orçamento de testes: R$ 0,00</p>
+<p>Reinvestimento planejado: 60%</p>
+<p>Operações financeiras reais: DESATIVADAS</p>
 </div>
 
+<div class="card" id="login">
+<h2>Acesso à VIDA AI</h2>
+<input id="email" type="email" placeholder="Seu e-mail">
+<input id="password" type="password" placeholder="Sua senha">
+<button onclick="entrar()">Entrar</button>
 </div>
+
+<div class="card" id="painel" hidden>
+<h2>Centro de comando</h2>
+<p id="usuario" class="muted"></p>
+<textarea id="objective" maxlength="1000" placeholder="Digite um objetivo para a VIDA AI"></textarea>
+<button onclick="enviar()">Enviar objetivo ao VIDA CORE</button>
+<button class="secondary" onclick="sair()">Sair</button>
+</div>
+
+<div class="card">
+<p id="status">Aguardando conexão...</p>
+<pre id="resultado" hidden></pre>
+</div>
+</main>
 
 <script>
-function registrar(){
- const campo=document.getElementById("tarefa");
- const status=document.getElementById("status");
- if(!campo.value.trim()){
-  status.textContent="Digite um objetivo primeiro.";
-  return;
- }
- status.textContent="Objetivo anotado nesta demonstração. Ainda não foi enviado ao banco de dados.";
- campo.value="";
+const SUPABASE_URL = "https://bdiiyhcjataabseadyir.supabase.co/rest/v1/";
+const SUPABASE_KEY = "sb_publishable_stY0jbfuEOKs2H7V20HXNA_PLVIXZcH";
+
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+function mensagem(texto){
+  document.getElementById("status").textContent = texto;
 }
+
+function mostrarPainel(usuario){
+  document.getElementById("login").hidden = !!usuario;
+  document.getElementById("painel").hidden = !usuario;
+  document.getElementById("usuario").textContent =
+    usuario ? "Conectado: " + usuario.email : "";
+}
+
+async function verificar(){
+  const {data,error} = await db.auth.getSession();
+  if(error){mensagem(error.message);return;}
+  mostrarPainel(data.session?.user || null);
+  mensagem(data.session ? "Sessão autenticada." : "Faça login para continuar.");
+}
+
+async function entrar(){
+  mensagem("Verificando acesso...");
+  const {data,error} = await db.auth.signInWithPassword({
+    email:document.getElementById("email").value.trim(),
+    password:document.getElementById("password").value
+  });
+  if(error){mensagem("Erro no login: "+error.message);return;}
+  mostrarPainel(data.user);
+  mensagem("Login realizado.");
+}
+
+async function enviar(){
+  const objective=document.getElementById("objective").value.trim();
+  if(!objective){mensagem("Digite um objetivo.");return;}
+  mensagem("Enviando ao VIDA CORE...");
+  try{
+    const {data,error}=await db.functions.invoke("vida-core",{
+      body:{objective}
+    });
+    if(error) throw error;
+    document.getElementById("resultado").textContent=
+      JSON.stringify(data,null,2);
+    document.getElementById("resultado").hidden=false;
+    mensagem("Resposta recebida do VIDA CORE.");
+  }catch(error){
+    mensagem("Falha na comunicação: "+error.message);
+  }
+}
+
+async function sair(){
+  await db.auth.signOut();
+  mostrarPainel(null);
+  mensagem("Sessão encerrada.");
+}
+
+db.auth.onAuthStateChange((_event,session)=>{
+  mostrarPainel(session?.user || null);
+});
+
+verificar();
 </script>
 </body>
 </html>
