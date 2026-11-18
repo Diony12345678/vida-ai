@@ -223,6 +223,111 @@ app.post("/api/activity", proteger, async (req, res) => {
 
 // Resposta padrão para erros inesperados
 
+// PAINEL SIMPLES DE TESTES DA VIDA AI
+app.get("/painel", (req, res) => {
+  res.type("html").send(`
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VIDA AI - Painel</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #10141d;
+  color: white;
+  padding: 22px;
+  max-width: 600px;
+  margin: auto;
+}
+h1 { color: #65d6a0; }
+input, textarea, button {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px;
+  margin: 9px 0;
+  border-radius: 8px;
+  border: 1px solid #444;
+  font-size: 16px;
+}
+input, textarea {
+  background: #202938;
+  color: white;
+}
+button {
+  background: #65d6a0;
+  color: #10141d;
+  font-weight: bold;
+  border: none;
+}
+pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: #202938;
+  padding: 14px;
+  border-radius: 8px;
+}
+small { color: #b8c1ce; }
+</style>
+</head>
+<body>
+<h1>VIDA AI</h1>
+<p>Painel de testes do coordenador central</p>
+
+<label>Chave administrativa</label>
+<input id="token" type="password"
+placeholder="Cole sua VIDA_ADMIN_TOKEN aqui">
+
+<label>Objetivo da empresa</label>
+<textarea id="objective" rows="4"
+placeholder="Exemplo: Encontrar oportunidades de negócios digitais lucrativos."></textarea>
+
+<button id="send">Distribuir tarefas aos agentes</button>
+
+<h3>Resultado</h3>
+<pre id="result">Aguardando teste...</pre>
+
+<script>
+const button = document.getElementById("send");
+button.addEventListener("click", async () => {
+  const token = document.getElementById("token").value;
+  const objective = document.getElementById("objective").value.trim();
+  const result = document.getElementById("result");
+
+  if (!token || !objective) {
+    result.textContent = "Informe a chave e um objetivo.";
+    return;
+  }
+
+  button.disabled = true;
+  result.textContent = "Enviando solicitação...";
+
+  try {
+    const response = await fetch("/api/coordination/plan", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({ objective })
+    });
+
+    const data = await response.json();
+    result.textContent = JSON.stringify(data, null, 2);
+  } catch (error) {
+    result.textContent = "Não foi possível conectar ao servidor.";
+  } finally {
+    button.disabled = false;
+  }
+});
+</script>
+</body>
+</html>
+  `);
+});
+
+
 // COORDENADOR CENTRAL DA VIDA AI
 
 const vidaAgents = [
