@@ -405,6 +405,7 @@ app.get("/api/coordination/pending", proteger, async (req, res) => {
 // PAINEL DE TESTES
 
 
+
 app.post("/api/coordination/test-free", proteger, async (req, res) => {
   try {
     const { data: tarefas, error } = await supabase
@@ -416,54 +417,68 @@ app.post("/api/coordination/test-free", proteger, async (req, res) => {
 
     if (error) throw error;
 
+    const normalizar = texto =>
+      texto.normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
 
-const agentesEsperados = [
-  "pesquisa",
-  "negocios",
-  "marketing",
-  "financas",
-  "operacoes"
-];
+    const modelos = [
+      {
+        nome: "pesquisa",
+        resultado: "Simulação: pesquisar mercados, identificar oportunidades e reunir informações relevantes."
+      },
+      {
+        nome: "negocios",
+        resultado: "Simulação: avaliar modelos de negócios, oportunidades de receita e estratégias de crescimento."
+      },
+      {
+        nome: "marketing",
+        resultado: "Simulação: elaborar estratégias de divulgação, posicionamento e aquisição de clientes."
+      },
+      {
+        nome: "financas",
+        resultado: "Simulação: analisar receitas, custos, despesas, rentabilidade e limites financeiros."
+      },
+      {
+        nome: "operacoes",
+        resultado: "Simulação: organizar tarefas, prioridades, processos e acompanhamento dos resultados."
+      }
+    ];
 
-const normalizar = texto =>
-  texto.normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim();
+    const resultados = modelos.map(modelo => {
+      const tarefa = tarefas.find(
+        t => normalizar(t.agent_name) === modelo.nome
+      );
 
-const verificacao = agentesEsperados.map(agente => {
-  const tarefa = tarefas.find(
-    t => normalizar(t.agent_name) === normalizar(agente)
-  );
+      return {
+        agente: modelo.nome,
+        encontrado: !!tarefa,
+        tarefa_id: tarefa ? tarefa.id : null,
+        status: tarefa ? "simulado" : "tarefa_nao_encontrada",
+        resultado: tarefa ? modelo.resultado : null
+      };
+    });
 
-  return {
-    agente,
-    encontrado: !!tarefa,
-    tarefa: tarefa || null
-  };
-});
-
-
-    
     return res.json({
       empresa: "VIDA AI",
-      modo: "SIMULAÇÃO GRATUITA DOS CINCO AGENTES",
+      modo: "SIMULAÇÃO DOS CINCO AGENTES",
       custo: "R$ 0,00",
-      total_tarefas_encontradas: tarefas.length,
-      tarefas_encontradas: tarefas,
-      agentes: verificacao,
-      resultado: "Leitura de tarefas concluída. Nenhum agente executou trabalho real de IA.",
-      banco_alterado: false
+      total_agentes: 5,
+      agentes_simulados: resultados.filter(r => r.encontrado).length,
+      resultados,
+      banco_alterado: false,
+      openai_acionada: false,
+      asaas_acionado: false
     });
+
   } catch (error) {
-    console.error("Erro no teste dos cinco agentes:", error);
+    console.error("Erro na simulação dos agentes:", error);
     return res.status(500).json({
-      erro: "Não foi possível testar os cinco agentes."
+      erro: "Não foi possível simular os cinco agentes."
     });
   }
 });
-
-
 
 
 app.get("/painel", (req, res) => {
