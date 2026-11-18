@@ -1,0 +1,106 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VIDA AI - Painel</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;background:#0b1220;color:#fff;
+ font-family:Arial,sans-serif;padding:20px
+}
+.container{max-width:850px;margin:auto}
+header{padding:25px 0}
+h1{font-size:34px;margin:5px 0;color:#62e6b1}
+.sub{color:#9eafc5}
+.card{
+ background:#152238;border:1px solid #293b55;
+ border-radius:15px;padding:20px;margin:15px 0
+}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.label{color:#9eafc5;font-size:13px}
+.value{font-size:25px;font-weight:bold;margin-top:9px}
+.green{color:#62e6b1}
+.red{color:#ff8585}
+button{
+ background:#62e6b1;color:#071b13;border:0;
+ border-radius:9px;padding:13px 18px;
+ font-weight:bold;cursor:pointer
+}
+input{
+ width:100%;padding:13px;border-radius:8px;
+ border:1px solid #34445c;background:#0b1423;
+ color:white;margin:10px 0
+}
+#status{color:#62e6b1;margin-top:12px}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+<div class="green">SISTEMA DE INTELIGÊNCIA</div>
+<h1>VIDA AI</h1>
+<div class="sub">Painel central de operações</div>
+</header>
+
+<div class="card">
+<h2>Visão geral</h2>
+<div class="grid">
+<div>
+<div class="label">Orçamento de testes</div>
+<div class="value">R$ 0,00</div>
+</div>
+<div>
+<div class="label">Operações reais</div>
+<div class="value red">DESATIVADAS</div>
+</div>
+<div>
+<div class="label">Reinvestimento planejado</div>
+<div class="value green">60%</div>
+</div>
+</div>
+</div>
+
+<div class="card">
+<h2>Centro de comando</h2>
+<p class="sub">Registre um objetivo para a próxima etapa de implementação.</p>
+<input id="tarefa" placeholder="Digite um objetivo para a VIDA AI">
+<button onclick="registrar()">Registrar objetivo</button>
+<div id="status"></div>
+</div>
+
+<div class="card">
+<h2>Módulos do sistema</h2>
+<p>● Banco de dados — configurado</p>
+<p>● VIDA CORE — função criada</p>
+<p>● Asaas Sandbox — integração em desenvolvimento</p>
+<p>● Painel web — versão inicial</p>
+<p>● Agentes autônomos — ainda não ativados</p>
+</div>
+
+<div class="card">
+<h2>Segurança financeira</h2>
+<p>Limite planejado por operação: R$ 100,00</p>
+<p>Orçamento autorizado para testes: R$ 0,00</p>
+<p class="red">Nenhum pagamento real autorizado.</p>
+</div>
+
+</div>
+
+<script>
+function registrar(){
+ const campo=document.getElementById("tarefa");
+ const status=document.getElementById("status");
+ if(!campo.value.trim()){
+  status.textContent="Digite um objetivo primeiro.";
+  return;
+ }
+ status.textContent="Objetivo anotado nesta demonstração. Ainda não foi enviado ao banco de dados.";
+ campo.value="";
+}
+</script>
+</body>
+</html>
