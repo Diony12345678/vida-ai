@@ -381,15 +381,19 @@ app.post("/api/coordination/plan", proteger, async (req, res) => {
   }
 
   try {
-    const tarefas = vidaAgents.map(agent => ({
-      title: `[${agent.name}] ${objective.trim()}`,
-      description:
-        `Responsabilidade: ${agent.specialty}. ` +
-        `Objetivo geral: ${objective.trim()}. ` +
-        "Esta tarefa foi planejada pelo coordenador e aguarda execução.",
-      status: "pending",
-      priority: agent.priority
-    }));
+    
+const tarefas = vidaAgents.map(agent => ({
+  task_name: `[${agent.name}] ${objective.trim()}`,
+  title: `[${agent.name}] ${objective.trim()}`,
+  agent_name: agent.name.toLowerCase(),
+  description:
+    `Responsabilidade: ${agent.specialty}. ` +
+    `Objetivo geral: ${objective.trim()}. ` +
+    "Esta tarefa foi planejada pelo coordenador e aguarda execução.",
+  status: "pending",
+  priority: agent.priority
+}));
+    
 
     const { data, error } = await supabase
       .from("vida_tasks")
