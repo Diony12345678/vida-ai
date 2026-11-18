@@ -445,6 +445,7 @@ app.post("/api/coordination/test-free", proteger, async (req, res) => {
   }
 });
 
+
 app.get("/painel", (req, res) => {
   res.type("html").send(`
 <!DOCTYPE html>
@@ -484,6 +485,9 @@ button {
   cursor: pointer;
 }
 button:disabled { opacity: 0.6; }
+#testFree {
+  background: #f0c75e;
+}
 pre {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -508,6 +512,7 @@ placeholder="Exemplo: Encontrar oportunidades de negócios digitais."></textarea
 
 <button id="send">Distribuir tarefas aos agentes</button>
 <button id="pending">Consultar tarefas pendentes</button>
+<button id="testFree">Testar 1 tarefa grátis (R$ 0,00)</button>
 
 <h3>Resultado</h3>
 <pre id="result">Aguardando teste...</pre>
@@ -515,6 +520,7 @@ placeholder="Exemplo: Encontrar oportunidades de negócios digitais."></textarea
 <script>
 const button = document.getElementById("send");
 const pendingButton = document.getElementById("pending");
+const testFreeButton = document.getElementById("testFree");
 const result = document.getElementById("result");
 
 function getToken() {
@@ -579,11 +585,42 @@ pendingButton.addEventListener("click", async () => {
     pendingButton.disabled = false;
   }
 });
+
+testFreeButton.addEventListener("click", async () => {
+  const token = getToken();
+
+  if (!token) {
+    result.textContent = "Informe a chave administrativa.";
+    return;
+  }
+
+  testFreeButton.disabled = true;
+  result.textContent = "Executando teste gratuito...";
+
+  try {
+    const response = await fetch("/api/coordination/test-free", {
+      method: "POST",
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
+
+    const data = await response.json();
+    result.textContent = JSON.stringify(data, null, 2);
+  } catch (error) {
+    result.textContent = "Não foi possível conectar ao servidor.";
+  } finally {
+    testFreeButton.disabled = false;
+  }
+});
 </script>
 </body>
 </html>
   `);
 });
+
+
+
 
 // CÉREBRO DA VIDA AI - DESATIVADO POR PADRÃO
 app.post("/api/ai/ask", proteger, async (req, res) => {
