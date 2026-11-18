@@ -404,6 +404,7 @@ app.get("/api/coordination/pending", proteger, async (req, res) => {
 
 // PAINEL DE TESTES
 
+
 app.post("/api/coordination/test-free", proteger, async (req, res) => {
   try {
     const { data: tarefas, error } = await supabase
@@ -411,39 +412,43 @@ app.post("/api/coordination/test-free", proteger, async (req, res) => {
       .select("id, task_name, title, description, agent_name, status, priority")
       .eq("status", "pending")
       .order("priority", { ascending: true })
-      .limit(1);
+      .limit(5);
 
     if (error) throw error;
 
-    if (!tarefas || tarefas.length === 0) {
-      return res.json({
-        modo: "gratuito",
-        mensagem: "Não existem tarefas pendentes para testar."
-      });
-    }
+    const agentesEsperados = [
+      "pesquisa",
+      "negocios",
+      "marketing",
+      "financas",
+      "operacoes"
+    ];
 
-    const tarefa = tarefas[0];
+    const agentesEncontrados = tarefas.map(t => t.agent_name);
+
+    const verificacao = agentesEsperados.map(agente => ({
+      agente,
+      encontrado: agentesEncontrados.includes(agente),
+      tarefa: tarefas.find(t => t.agent_name === agente) || null
+    }));
 
     return res.json({
       empresa: "VIDA AI",
-      modo: "SIMULAÇÃO GRATUITA",
+      modo: "SIMULAÇÃO GRATUITA DOS CINCO AGENTES",
       custo: "R$ 0,00",
-      tarefa: tarefa,
-      resultado: {
-        agente: tarefa.agent_name,
-        status: "Teste realizado",
-        analise: "Esta é uma simulação técnica. Nenhuma análise real de inteligência artificial foi executada.",
-        proxima_etapa: "Ativar o processamento inteligente quando autorizado."
-      },
+      total_tarefas_encontradas: tarefas.length,
+      agentes: verificacao,
+      resultado: "Leitura de tarefas concluída. Nenhum agente executou trabalho real de IA.",
       banco_alterado: false
     });
   } catch (error) {
-    console.error("Erro no teste gratuito:", error);
+    console.error("Erro no teste dos cinco agentes:", error);
     return res.status(500).json({
-      erro: "Não foi possível executar o teste gratuito."
+      erro: "Não foi possível testar os cinco agentes."
     });
   }
 });
+
 
 
 app.get("/painel", (req, res) => {
