@@ -403,6 +403,48 @@ app.get("/api/coordination/pending", proteger, async (req, res) => {
 });
 
 // PAINEL DE TESTES
+
+app.post("/api/coordination/test-free", proteger, async (req, res) => {
+  try {
+    const { data: tarefas, error } = await supabase
+      .from("vida_tasks")
+      .select("id, task_name, title, description, agent_name, status, priority")
+      .eq("status", "pending")
+      .order("priority", { ascending: true })
+      .limit(1);
+
+    if (error) throw error;
+
+    if (!tarefas || tarefas.length === 0) {
+      return res.json({
+        modo: "gratuito",
+        mensagem: "Não existem tarefas pendentes para testar."
+      });
+    }
+
+    const tarefa = tarefas[0];
+
+    return res.json({
+      empresa: "VIDA AI",
+      modo: "SIMULAÇÃO GRATUITA",
+      custo: "R$ 0,00",
+      tarefa: tarefa,
+      resultado: {
+        agente: tarefa.agent_name,
+        status: "Teste realizado",
+        analise: "Esta é uma simulação técnica. Nenhuma análise real de inteligência artificial foi executada.",
+        proxima_etapa: "Ativar o processamento inteligente quando autorizado."
+      },
+      banco_alterado: false
+    });
+  } catch (error) {
+    console.error("Erro no teste gratuito:", error);
+    return res.status(500).json({
+      erro: "Não foi possível executar o teste gratuito."
+    });
+  }
+});
+
 app.get("/painel", (req, res) => {
   res.type("html").send(`
 <!DOCTYPE html>
