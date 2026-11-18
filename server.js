@@ -433,11 +433,13 @@ app.post("/api/coordination/test-free", proteger, async (req, res) => {
     }));
 
     return res.json({
-      empresa: "VIDA AI",
-      modo: "SIMULAÇÃO GRATUITA DOS CINCO AGENTES",
-      custo: "R$ 0,00",
-      total_tarefas_encontradas: tarefas.length,
-      agentes: verificacao,
+      return res.json({
+  empresa: "VIDA AI",
+  modo: "SIMULAÇÃO GRATUITA DOS CINCO AGENTES",
+  custo: "R$ 0,00",
+  total_tarefas_encontradas: tarefas.length,
+  tarefas_encontradas: tarefas,
+  agentes: verificacao,
       resultado: "Leitura de tarefas concluída. Nenhum agente executou trabalho real de IA.",
       banco_alterado: false
     });
