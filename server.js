@@ -4,6 +4,35 @@ import { createClient } from "@supabase/supabase-js";
 import { timingSafeEqual } from "node:crypto";
 
 const app = express();
+
+const vidaAgents = [
+  {
+    name: "Pesquisa",
+    specialty: "Pesquisar mercados, tendências e oportunidades de negócios.",
+    priority: 1
+  },
+  {
+    name: "Negócios",
+    specialty: "Avaliar oportunidades e desenvolver modelos de negócios.",
+    priority: 2
+  },
+  {
+    name: "Marketing",
+    specialty: "Planejar divulgação, marketing e aquisição de clientes.",
+    priority: 3
+  },
+  {
+    name: "Finanças",
+    specialty: "Analisar custos, receitas, lucros e sustentabilidade financeira.",
+    priority: 4
+  },
+  {
+    name: "Operações",
+    specialty: "Organizar tarefas, processos e acompanhar resultados.",
+    priority: 5
+  }
+];
+
 app.use(express.json({ limit: "100kb" }));
 
 const PORT = process.env.PORT || 3000;
