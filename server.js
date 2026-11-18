@@ -832,7 +832,123 @@ app.post("/api/ai/ask", proteger, async (req, res) => {
 });
 
 
+
+// ==========================================
+// VIDA AI - PROSPECCAO DE CLIENTES
+// ==========================================
+
+// Listar empresas cadastradas
+app.get("/api/leads", proteger, async (req, res) => {
+  try {
+    const limit = Math.min(
+      Math.max(parseInt(req.query.limit, 10) || 50, 1),
+      100
+    );
+
+    let query = supabase
+      .from("vida_leads")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    if (req.query.status) {
+      query = query.eq("status", req.query.status);
+    }
+
+    if (req.query.segment) {
+      query = query.ilike("segment", `%${req.query.segment}%`);
+    }
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+
+    res.json({
+      sucesso: true,
+      total: data.length,
+      leads: data
+    });
+  } catch (error) {
+    console.error("Erro ao consultar leads:", error.message);
+
+    res.status(500).json({
+      erro: "Erro ao consultar potenciais clientes."
+    });
+  }
+});
+
+// Cadastrar uma empresa
+app.post("/api/leads", proteger, async (req, res) => {
+  try {
+    const {
+      company_name,
+      segment,
+      city,
+      state,
+      website,
+      commercial_email,
+      contact_form_url,
+      instagram_url,
+      whatsapp_number,
+      whatsapp_consent,
+      contact_permission_source,
+      lead_source,
+      notes
+    } = req.body;
+
+    if (
+      typeof company_name !== "string" ||
+      !company_name.trim() ||
+      company_name.length > 200
+    ) {
+      return res.status(400).json({
+        erro: "Informe um nome de empresa válido."
+      });
+    }
+
+    const lead = {
+      company_name: company_name.trim(),
+      segment: segment || null,
+      city: city || null,
+      state: state || null,
+      website: website || null,
+      commercial_email: commercial_email || null,
+      contact_form_url: contact_form_url || null,
+      instagram_url: instagram_url || null,
+      whatsapp_number: whatsapp_number || null,
+      whatsapp_consent: whatsapp_consent === true,
+      contact_permission_source: contact_permission_source || null,
+      lead_source: lead_source || null,
+      notes: notes || null,
+      status: "new"
+    };
+
+    const { data, error } = await supabase
+      .from("vida_leads")
+      .insert(lead)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.status(201).json({
+      sucesso: true,
+      mensagem: "Empresa cadastrada com sucesso.",
+      lead: data
+    });
+  } catch (error) {
+    console.error("Erro ao cadastrar lead:", error.message);
+
+    res.status(500).json({
+      erro: "Erro ao cadastrar empresa."
+    });
+  }
+});
+
+// ==========================================
 // TRATAMENTO DE ERROS — DEVE FICAR NO FINAL
+// ==========================================
+
 app.use((err, req, res, next) => {
   console.error("Erro interno:", err.message);
 
@@ -845,7 +961,10 @@ app.use((err, req, res, next) => {
   });
 });
 
+// ==========================================
 // INICIAR SERVIDOR
+// ==========================================
+
 app.listen(PORT, () => {
   console.log(`VIDA AI rodando na porta ${PORT}`);
 });
