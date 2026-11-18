@@ -416,21 +416,33 @@ app.post("/api/coordination/test-free", proteger, async (req, res) => {
 
     if (error) throw error;
 
-    const agentesEsperados = [
-      "pesquisa",
-      "negocios",
-      "marketing",
-      "financas",
-      "operacoes"
-    ];
 
-    const agentesEncontrados = tarefas.map(t => t.agent_name);
+const agentesEsperados = [
+  "pesquisa",
+  "negocios",
+  "marketing",
+  "financas",
+  "operacoes"
+];
 
-    const verificacao = agentesEsperados.map(agente => ({
-      agente,
-      encontrado: agentesEncontrados.includes(agente),
-      tarefa: tarefas.find(t => t.agent_name === agente) || null
-    }));
+const normalizar = texto =>
+  texto.normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+
+const verificacao = agentesEsperados.map(agente => {
+  const tarefa = tarefas.find(
+    t => normalizar(t.agent_name) === normalizar(agente)
+  );
+
+  return {
+    agente,
+    encontrado: !!tarefa,
+    tarefa: tarefa || null
+  };
+});
+
 
     
     return res.json({
