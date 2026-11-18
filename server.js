@@ -222,6 +222,98 @@ app.post("/api/activity", proteger, async (req, res) => {
 });
 
 // Resposta padrão para erros inesperados
+
+// COORDENADOR CENTRAL DA VIDA AI
+
+const vidaAgents = [
+  {
+    name: "Pesquisa",
+    specialty: "Pesquisar mercados e oportunidades",
+    priority: 1
+  },
+  {
+    name: "Negócios",
+    specialty: "Avaliar e desenvolver modelos de negócios",
+    priority: 2
+  },
+  {
+    name: "Marketing",
+    specialty: "Planejar divulgação e aquisição de clientes",
+    priority: 3
+  },
+  {
+    name: "Finanças",
+    specialty: "Analisar custos, receitas e rentabilidade",
+    priority: 4
+  },
+  {
+    name: "Operações",
+    specialty: "Organizar tarefas e acompanhar resultados",
+    priority: 5
+  }
+];
+
+// Consultar os agentes disponíveis
+app.get("/api/agents", proteger, (req, res) => {
+  res.json({
+    empresa: "VIDA AI",
+    coordenador: "Central",
+    agentes: vidaAgents
+  });
+});
+
+// Distribuir um objetivo entre os agentes
+app.post("/api/coordination/plan", proteger, async (req, res) => {
+  const { objective } = req.body;
+
+  if (
+    typeof objective !== "string" ||
+    !objective.trim() ||
+    objective.length > 1000
+  ) {
+    return res.status(400).json({
+      erro: "Informe um objetivo de até 1000 caracteres."
+    });
+  }
+
+  try {
+    const tarefas = vidaAgents.map(agent => ({
+      title: `[${agent.name}] ${objective.trim()}`,
+      description:
+        `Responsabilidade: ${agent.specialty}. ` +
+        `Objetivo geral: ${objective.trim()}. ` +
+        "Esta tarefa foi planejada pelo coordenador e aguarda execução.",
+      status: "pending",
+      priority: agent.priority
+    }));
+
+    const { data, error } = await supabase
+      .from("vida_tasks")
+      .insert(tarefas)
+      .select();
+
+    if (error) throw error;
+
+    await supabase.from("vida_activity").insert({
+      action: "coordination_plan_created",
+      details: `Objetivo distribuído entre ${data.length} agentes.`
+    });
+
+    res.status(201).json({
+      empresa: "VIDA AI",
+      objetivo: objective.trim(),
+      tarefas_criadas: data.length,
+      tarefas: data
+    });
+
+  } catch (error) {
+    console.error("Erro no coordenador:", error.message);
+    res.status(500).json({
+      erro: "Não foi possível distribuir as tarefas."
+    });
+  }
+});
+
 app.use((err, req, res, next) => {
   
 // CÉREBRO DA VIDA AI - OpenAI Responses API
