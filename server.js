@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 3000;
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SECRET_KEY;
-const adminToken = process.env.VIDA_ADMIN_TOKEN;
+const adminToken = process.env.VIDA_ADMIN_TOKEN?.trim();
 
 if (!supabaseUrl || !supabaseKey || !adminToken) {
   console.error("Configurações obrigatórias ausentes no Render.");
